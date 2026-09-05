@@ -8,13 +8,16 @@
 <meta name="theme-color" content="#0A1224">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230A1224'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%232BE0C4' stroke-width='1.6' opacity='.55'/%3E%3Ccircle cx='16' cy='16' r='3.6' fill='%232BE0C4'/%3E%3C/svg%3E">
 
-<!-- DEPLOY STEP: patch og:url and og:image with the live absolute URL before zipping -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="Sky Worth: Know the moment it moves">
 <meta property="og:description" content="GPS vehicle tracking, fleet and fuel monitoring, and asset recovery. Kampala since 2014.">
-<meta property="og:url" content="REPLACE_AT_DEPLOY">
-<meta property="og:image" content="REPLACE_AT_DEPLOY/assets/hero-ending.jpg">
 <meta name="twitter:card" content="summary_large_image">
+<!-- DEPLOY STEP: og:url and og:image need the live absolute origin, which does
+     not exist until the first deploy. Add both once the domain is known:
+       <meta property="og:url" content="https://YOUR-DOMAIN/">
+       <meta property="og:image" content="https://YOUR-DOMAIN/assets/hero-ending.jpg">
+     They are omitted rather than left as placeholders, because a broken og:url
+     is worse for link previews than a missing one. -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -302,6 +305,13 @@ p{margin:0}
 .shot img{width:100%;height:100%;object-fit:cover}
 .shot::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(180deg,transparent 55%,rgba(5,7,15,.55))}
+/* a designed empty state, so a section whose photograph is absent still reads
+   as composed rather than broken */
+.shot.noimg{display:grid;place-items:center;
+  background:radial-gradient(ellipse 70% 60% at 50% 46%,#16223C 0%,#0B1424 62%,#080F1E 100%)}
+.shot.noimg::before{content:"";width:74px;height:74px;border-radius:50%;
+  border:1px solid var(--accent-muted);box-shadow:0 0 0 14px rgba(43,224,196,.05);
+  background:radial-gradient(circle,var(--accent) 0 3px,transparent 4px)}
 .fuel p + p{margin-top:16px}
 .big-num{font-family:var(--display);font-weight:700;font-size:clamp(2.6rem,6vw,4.2rem);
   color:var(--accent);line-height:.95;letter-spacing:-.03em}
@@ -823,7 +833,18 @@ var video=document.getElementById('hero');
 var ring=document.getElementById('ring');
 var posterLayer=document.getElementById('poster');
 
-var VIDEO_URL='assets/hero-scrub.mp4';
+var VIDEO_MP4='assets/hero-scrub.mp4';
+var VIDEO_WEBM='assets/hero-scrub.webm';
+// H.264 is near-universal, but some Linux and open-source browser builds ship
+// without the decoder and would silently fall back to the still hero. VP9
+// covers those. Whichever wins, only one file is ever fetched.
+var VIDEO_URL=(function(){
+  var v=document.createElement('video');
+  if(v.canPlayType('video/mp4; codecs="avc1.64001F"')||
+     v.canPlayType('video/mp4; codecs="avc1.42E01E"')) return VIDEO_MP4;
+  if(v.canPlayType('video/webm; codecs="vp9"')) return VIDEO_WEBM;
+  return VIDEO_MP4;
+})();
 var POSTER_URL='assets/hero-poster.jpg';
 var VIDEO_BYTES=6000000;
 
@@ -943,7 +964,23 @@ function startBlobFetch(){
   loadHeroBlob().catch(failVideo);
 }
 
+function attachAndSeek(){
+  video.load();
+  video.addEventListener('canplay',function(){
+    if(ring&&ring.parentNode){ring.parentNode.removeChild(ring);ring=null;}
+    requestSeek(heroProgress()*(video.duration||0));
+    stage.classList.add('video-ready');
+  },{once:true});
+}
+
 async function loadHeroBlob(){
+  // single-file build: the clip is already inlined, so there is nothing to fetch
+  if(VIDEO_URL.slice(0,5)==='data:'){
+    if(ring) ring.style.setProperty('--ld',0);
+    video.src=VIDEO_URL;
+    attachAndSeek();
+    return;
+  }
   var ctrl=new AbortController();
   var watchdog=setTimeout(function(){ctrl.abort();},20000);
   var res=await fetch(VIDEO_URL,{signal:ctrl.signal});
@@ -968,12 +1005,7 @@ async function loadHeroBlob(){
   clearTimeout(watchdog);
   if(ring) ring.style.setProperty('--ld',0);
   video.src=URL.createObjectURL(new Blob(chunks));
-  video.load();
-  video.addEventListener('canplay',function(){
-    if(ring&&ring.parentNode){ring.parentNode.removeChild(ring);ring=null;}
-    requestSeek(heroProgress()*(video.duration||0));
-    stage.classList.add('video-ready');
-  },{once:true});
+  attachAndSeek();
 }
 
 function initHeroOnce(){
@@ -1146,6 +1178,13 @@ addEventListener('scroll',function(){
 
 document.addEventListener('visibilitychange',function(){
   document.body.classList.toggle('paused',document.hidden);
+});
+
+/* a section image that fails to load must not leave a broken frame behind */
+document.querySelectorAll('.shot img').forEach(function(im){
+  function drop(){var s=im.closest('.shot');if(s)s.classList.add('noimg');im.remove();}
+  im.addEventListener('error',drop);
+  if(im.complete&&im.naturalWidth===0) drop();
 });
 
 applyHeroMode();

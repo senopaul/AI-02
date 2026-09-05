@@ -67,6 +67,11 @@ ffmpeg -v error -i "$RAW/hero-raw.mp4" \
   -c:v libx264 -crf 18 -preset slow -g 8 -keyint_min 8 \
   -pix_fmt yuv420p -movflags +faststart -an "$OUT/hero-scrub.mp4" -y
 
+# VP9 fallback, for browsers built without an H.264 decoder
+ffmpeg -v error -i "$RAW/hero-raw.mp4" \
+  -c:v libvpx-vp9 -crf 34 -b:v 0 -g 8 -keyint_min 8 \
+  -deadline good -cpu-used 4 -row-mt 1 -pix_fmt yuv420p -an "$OUT/hero-scrub.webm" -y
+
 SIZE=$(stat -c%s "$OUT/hero-scrub.mp4" 2>/dev/null || stat -f%z "$OUT/hero-scrub.mp4")
 MB=$(awk "BEGIN{printf \"%.1f\", $SIZE/1048576}")
 echo "hero-scrub.mp4 is ${MB} MB (${SIZE} bytes)"
@@ -95,7 +100,7 @@ PY
 
 # ---------------------------------------------------------------- 6. verify
 say "Verifying every output"
-for f in hero-scrub.mp4 hero-poster.jpg hero-ending.jpg fuel-corridor.jpg fitting-bay.jpg; do
+for f in hero-scrub.mp4 hero-scrub.webm hero-poster.jpg hero-ending.jpg fuel-corridor.jpg fitting-bay.jpg; do
   p="$OUT/$f"
   [ -s "$p" ] || { echo "MISSING or empty: $f"; exit 1; }
   printf '  %-20s %8s bytes  %s\n' "$f" "$(stat -c%s "$p" 2>/dev/null || stat -f%z "$p")" \
