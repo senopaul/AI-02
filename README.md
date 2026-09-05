@@ -55,6 +55,33 @@ to rest, runs the scrub encode with a keyframe every 8 frames, cuts the poster
 and ending frame, sizes the section stills, and patches the real byte size into
 the loader. It refuses to run and changes nothing if the CDN is unreachable.
 
+## Deploying to GitHub Pages
+
+The repo ships `.github/workflows/pages.yml`, so there is nothing to configure
+beyond switching Pages on:
+
+1. **Settings → Pages → Build and deployment → Source: GitHub Actions.**
+   Not "Deploy from a branch". Pages can only serve a branch's root or its
+   `/docs` folder, and this site lives in `site/`; the workflow uploads that
+   folder as the Pages artifact instead, which avoids restructuring the repo.
+2. Push to `main`, or run the workflow by hand from the Actions tab.
+
+The site lands at **`https://senopaul.github.io/AI-02/`**. Every asset
+reference in `index.html` is relative, so serving from a subpath works with no
+base-path rewriting; this is verified, not assumed.
+
+The workflow fails the deploy if `site/index.html` or `site/assets/hero-scrub.mp4`
+is missing. Without that check a deploy with no hero film still renders a
+perfectly valid page, so nothing else would catch it.
+
+**Two limits of Pages worth knowing.** It sets its own cache headers, so the
+one-year immutable caching in `site/vercel.json` does not apply there. And a
+private repo needs a paid GitHub plan for Pages; this repo is public, so it is
+free.
+
+For a custom domain, add `site/CNAME` containing the bare hostname, then point
+the DNS at GitHub's Pages IPs.
+
 ## Deploying to Vercel
 
 The site is static, so there is no build step and no framework. Import the repo

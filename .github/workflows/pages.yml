@@ -1,0 +1,55 @@
+name: Deploy to GitHub Pages
+
+# GitHub Pages can only serve a branch's root or its /docs folder, and this
+# site lives in site/. Rather than restructure the repo around that limitation,
+# this workflow uploads site/ as the Pages artifact, which keeps the layout
+# working for every other host too.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deploy finish rather than cancelling it half way.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Fail if the hero video is missing
+        # A silent deploy without the film is the one failure worth catching in
+        # CI: the page still renders, so nothing else would notice.
+        run: |
+          test -s site/index.html || { echo "site/index.html is missing"; exit 1; }
+          test -s site/assets/hero-scrub.mp4 || { echo "site/assets/hero-scrub.mp4 is missing"; exit 1; }
+          echo "site/ contents:"
+          ls -lh site site/assets
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload site/ as the Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
