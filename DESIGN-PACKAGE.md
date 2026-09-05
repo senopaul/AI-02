@@ -31,6 +31,32 @@ funnels there.
 
 ---
 
+## 1b. The imagery rule: it has to look Ugandan
+
+Standing rule for every generated asset on this site, set by the owner after
+the first round came back looking like a generic foreign metropolis.
+
+Naming the country is not enough. "A large East African city" produces a
+Western or Gulf skyline every time. Every prompt must carry the concrete
+physical facts:
+
+- **Hills, not a flat grid.** Kampala is built across low hills with dark
+  valleys between them.
+- **Low-rise, not a skyline.** One and two storey buildings with corrugated
+  iron sheet roofs. No glass towers. No skyscrapers.
+- **Sparse, uneven light.** Warm points from security lamps, small shopfronts
+  and roadside kiosks, with genuinely dark ground between the clusters. Never
+  the continuous carpet of street lighting that reads as Europe or the Gulf.
+- **Red murram earth roads**, pale orange, narrow, threading through.
+- **Dark masses of mango and jackfruit trees** breaking up the rooftops.
+- Where vehicles appear: matatu minivans, boda boda motorcycles, pickups and
+  Hiace vans, not European saloons.
+
+Every image gets inspected against this list, the same way it gets inspected
+for trademarks and anatomy. An image that is beautiful but foreign fails.
+
+---
+
 ## 2. The palette as CSS tokens
 
 Sampled from the world of the footage: night sky over Kampala, the warm sodium
