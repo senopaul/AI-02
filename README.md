@@ -1,0 +1,77 @@
+# Sky Worth: cinematic site
+
+A scroll-driven site for **Sky Worth Ltd**, Kampala. GPS vehicle tracking,
+fleet and fuel monitoring, and asset recovery across Uganda, Kenya, South Sudan
+and DR Congo.
+
+The visitor scrolls and a generated film plays forward under the words, backward
+when they scroll up. The page settles on the film's composed ending, and a real
+website begins there.
+
+## What is in here
+
+| Path | What it is |
+|---|---|
+| `site/index.html` | The whole website. One file. |
+| `site/assets/` | Processed video and images. Populated by the script below. |
+| `DESIGN-PACKAGE.md` | Every creative decision, written before generating. Its copy ships verbatim. |
+| `ASSETS.md` | The approved generations, their URLs and what they cost. |
+| `fetch-and-process.sh` | Fetches those assets and processes them into `site/assets/`. |
+| `review/` | Raws and review frames. Git-ignored, never shipped. |
+
+## Stack
+
+Plain HTML, CSS and vanilla JavaScript. No framework, no build step, no npm, no
+database. It is a folder of static files that any host can serve, which is why
+the deploy is one command and the page is 15.7 KB gzipped before imagery.
+
+## Running it
+
+Double-clicking `index.html` shows the still-image hero, because browsers block
+`fetch` on `file://` URLs and the video loader falls back by design. That state
+is worth seeing: the page has to be complete without the video.
+
+For the real scroll experience, serve the folder:
+
+```bash
+cd site && npx http-server -p 8080     # or: python3 -m http.server 8080
+```
+
+Then open `http://localhost:8080` in a browser. The app's built-in preview pane
+struggles with scroll-video pages; use a real browser window.
+
+## Getting the imagery in
+
+The assets live in Higgsfield and are listed in `ASSETS.md`. On a machine that
+can reach that CDN:
+
+```bash
+./fetch-and-process.sh              # variant A for both section stills
+FUEL=B BAY=B ./fetch-and-process.sh # the other variants
+```
+
+It fetches the raws, pulls review frames, measures whether the shot truly comes
+to rest, runs the scrub encode with a keyframe every 8 frames, cuts the poster
+and ending frame, sizes the section stills, and patches the real byte size into
+the loader. It refuses to run and changes nothing if the CDN is unreachable.
+
+## Two things that are load-bearing
+
+**The keyframe interval.** `-g 8 -keyint_min 8` on the scrub encode. Browsers
+seek precisely only to keyframes, so a long interval makes scrubbing stutter no
+matter how good the rest of the code is.
+
+**The Blob fetch.** The video is downloaded whole and played from an object URL
+rather than streamed. Many hosts silently lack HTTP Range support, and without
+it every seek clamps to zero: the scrub works perfectly on localhost and does
+nothing at all on the live site.
+
+## Facts on the page
+
+The theft and fuel-loss figures come from Ugandan police reporting and East
+African fleet coverage. They are real and should be re-checked before they go
+stale.
+
+**No prices are invented.** Every tier reads "Request a quote" until Sky Worth
+supplies real figures. `DESIGN-PACKAGE.md` says the same thing, so nobody fills
+them in with guesses later.
