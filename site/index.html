@@ -18,7 +18,14 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500&display=swap">
+<!-- Loaded non-render-blocking on purpose. A pending stylesheet blocks execution
+     of every script after it, which left the hero engine waiting on a font
+     request before it could run. media="print" makes the fetch non-blocking;
+     onload promotes it to all. The noscript copy covers scripting-off. -->
+<link rel="stylesheet" media="print" onload="this.media='all';this.onload=null"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500&display=swap">
+<noscript><link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500&display=swap"></noscript>
 
 <style>
 /* ============================================================ tokens */
@@ -748,7 +755,7 @@ body.paused *,body.paused *::before,body.paused *::after{animation-play-state:pa
       <div>
         <h4>Reach us</h4>
         <ul>
-          <li><a href="https://wa.me/256703664233" rel="noopener">WhatsApp 0703 664 233</a></li>
+          <li><a href="https://wa.me/256703664233?text=Hi%20Sky%20Worth%2C%20I%20would%20like%20a%20tracking%20quote%20for%20my%20vehicle." rel="noopener">WhatsApp 0703 664 233</a></li>
           <li><a href="tel:+256782390246">0782 390 246</a></li>
           <li><a href="tel:+256414671986">0414 671 986</a></li>
           <li><a href="mailto:info@sky-worths.com">info@sky-worths.com</a></li>
@@ -1057,17 +1064,24 @@ function setHold(v){
   var s=(secs<10?'0':'')+secs+'s';
   if(s!==lastClock){lastClock=s;clockEl.textContent=s;}
 }
+function markFound(){
+  holdDone=true;holding=false;
+  setHold(1);                       // the counter stays at 60s once it is found
+  holdCard.classList.add('done');
+  noteEl.textContent='That is the whole idea.';
+  holdBtn.textContent='Found';      // the button and the note must not say the same sentence
+}
 function holdTick(now){
   var dt=Math.min(100,now-(holdLast||now));
   holdLast=now;
+  if(holdDone){setHold(1);holdRaf=null;holdLast=0;return;}
+
   if(holding) setHold(hp+dt/2200);
   else setHold(hp-dt/1400);
 
-  if(holding&&hp>=1&&!holdDone){
-    holdDone=true;
-    holdCard.classList.add('done');
-    noteEl.textContent='Found. That is the whole idea.';
-    holdBtn.textContent='Found. That is the whole idea.';
+  if(holding&&hp>=1){
+    markFound();
+    holdRaf=null;holdLast=0;return;
   }
   if((holding&&hp<1)||(!holding&&hp>0)) holdRaf=requestAnimationFrame(holdTick);
   else {holdRaf=null;holdLast=0;}
@@ -1099,12 +1113,8 @@ function pinToFinalStates(){
   document.querySelectorAll('.sec .wrap, .mapwrap').forEach(function(el){el.classList.add('in','done');});
   if(rule) rule.style.setProperty('--draw',1);
   if(holdCard&&!holdDone){
-    holdDone=true;holding=false;
     if(holdRaf!==null){cancelAnimationFrame(holdRaf);holdRaf=null;}
-    setHold(1);
-    holdCard.classList.add('done');
-    noteEl.textContent='Found. That is the whole idea.';
-    holdBtn.textContent='Found. That is the whole idea.';
+    markFound();
   }
 }
 function unpinFinalStates(){
