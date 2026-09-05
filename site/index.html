@@ -1,0 +1,1145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sky Worth: Know the moment it moves</title>
+<meta name="description" content="GPS vehicle tracking, fleet and fuel monitoring, and asset recovery. Kampala since 2014, across Uganda, Kenya, South Sudan and DR Congo.">
+<meta name="theme-color" content="#080D1A">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23080D1A'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%232BE0C4' stroke-width='1.6' opacity='.55'/%3E%3Ccircle cx='16' cy='16' r='3.6' fill='%232BE0C4'/%3E%3C/svg%3E">
+
+<!-- DEPLOY STEP: patch og:url and og:image with the live absolute URL before zipping -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Sky Worth: Know the moment it moves">
+<meta property="og:description" content="GPS vehicle tracking, fleet and fuel monitoring, and asset recovery. Kampala since 2014.">
+<meta property="og:url" content="REPLACE_AT_DEPLOY">
+<meta property="og:image" content="REPLACE_AT_DEPLOY/assets/hero-ending.jpg">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500&display=swap">
+
+<style>
+/* ============================================================ tokens */
+:root{
+  --canvas:#080D1A;
+  --panel:#0E1526;
+  --panel-2:#131C31;
+  --accent:#2BE0C4;
+  --accent-hover:#5AEBD5;
+  --accent-muted:#17544C;
+  --sodium:#FF9B4A;
+  --line:#1E293F;
+  --line-strong:#33415F;
+  --text-primary:#EEF2F8;
+  --text-secondary:#9AA8BF;
+
+  --display:'Archivo',system-ui,sans-serif;
+  --body:'Public Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --ease-soft:cubic-bezier(.4,0,.2,1);
+
+  --tshadow:0 1px 2px rgba(5,5,10,.95),0 3px 12px rgba(5,5,10,.78),0 10px 44px rgba(5,5,10,.8);
+  --pad:clamp(20px,5vw,64px);
+  --maxw:1240px;
+}
+
+/* ============================================================ base */
+*,*::before,*::after{box-sizing:border-box}
+html,body{overflow-x:hidden;overflow-x:clip}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--canvas);color:var(--text-primary);
+  font-family:var(--body);font-size:17px;line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+img,svg,video{display:block;max-width:100%}
+a{color:inherit}
+h1,h2,h3{font-family:var(--display);font-weight:700;line-height:1.05;letter-spacing:-.02em;margin:0}
+p{margin:0}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+
+.skip{position:absolute;left:-9999px;top:0;z-index:100;background:var(--accent);color:var(--canvas);
+  padding:12px 20px;border-radius:0 0 8px 0;font-weight:600}
+.skip:focus{left:0}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--pad)}
+.kicker{font-family:var(--mono);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 18px}
+.lede{color:var(--text-secondary);font-size:1.06rem;max-width:62ch}
+
+/* ============================================================ the one environment */
+.env{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 110% 80% at 50% 0%,#0D1830 0%,var(--canvas) 62%)}
+.env::before{content:"";position:absolute;inset:-10%;
+  background-image:
+    radial-gradient(1.6px 1.6px at 12% 22%,rgba(43,224,196,.5),transparent),
+    radial-gradient(1.4px 1.4px at 68% 14%,rgba(43,224,196,.34),transparent),
+    radial-gradient(1.8px 1.8px at 34% 71%,rgba(43,224,196,.3),transparent),
+    radial-gradient(1.3px 1.3px at 84% 58%,rgba(255,155,74,.28),transparent),
+    radial-gradient(1.5px 1.5px at 51% 44%,rgba(43,224,196,.26),transparent),
+    radial-gradient(1.2px 1.2px at 22% 88%,rgba(43,224,196,.3),transparent),
+    radial-gradient(1.4px 1.4px at 92% 31%,rgba(43,224,196,.22),transparent);
+  animation:drift 90s linear -22s infinite}
+@keyframes drift{
+  0%{transform:translate3d(0,0,0)}
+  50%{transform:translate3d(-2.2%,-3.4%,0)}
+  100%{transform:translate3d(0,0,0)}
+}
+
+/* ============================================================ nav */
+.nav{position:fixed;top:0;left:0;right:0;z-index:40;
+  backdrop-filter:blur(14px);background:rgba(8,13,26,.72);
+  border-bottom:1px solid transparent;transition:border-color .4s var(--ease),background .4s var(--ease)}
+.nav.stuck{border-bottom-color:var(--line);background:rgba(8,13,26,.9)}
+.nav-in{max-width:var(--maxw);margin:0 auto;padding:14px var(--pad);
+  display:flex;align-items:center;gap:24px}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;font-family:var(--display);
+  font-weight:700;font-size:1.06rem;letter-spacing:-.01em;flex:none}
+.brand .mark{width:26px;height:26px;flex:none}
+.nav-links{display:flex;gap:26px;margin-left:auto;font-size:.93rem}
+.nav-links a{text-decoration:none;color:var(--text-secondary);transition:color .3s var(--ease)}
+.nav-links a:hover{color:var(--text-primary)}
+@media (max-width:900px){.nav-links{display:none}}
+
+.btn{display:inline-block;font-family:var(--body);font-weight:600;font-size:.95rem;
+  padding:11px 22px;border-radius:999px;text-decoration:none;border:1px solid transparent;
+  transition:background .3s var(--ease),color .3s var(--ease),border-color .3s var(--ease),transform .3s var(--ease)}
+.btn-go{background:var(--accent);color:var(--canvas)}
+.btn-go:hover{background:var(--accent-hover);transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-strong);color:var(--text-primary)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.nav .btn{flex:none}
+@media (pointer:coarse){
+  .btn{min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+}
+
+/* ============================================================ hero */
+.hero{position:relative;height:600vh;z-index:1}
+.stage{position:sticky;top:0;height:100vh;overflow:hidden;background:#05070F}
+
+.poster{position:absolute;inset:0;background-size:cover;background-position:center;
+  opacity:0;transition:opacity .9s var(--ease)}
+.poster.on{opacity:1}
+#hero{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  opacity:0;transition:opacity .8s var(--ease);will-change:transform;transform:translateZ(0)}
+.stage.video-ready #hero{opacity:1}
+.stage.video-failed #hero{display:none}
+
+/* layer 1, the global base scrim */
+.scrim{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 120% 90% at 50% 45%,rgba(10,10,18,0) 35%,rgba(10,10,18,.62) 100%)}
+.scrim-top{position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(5,7,15,.72) 0%,rgba(5,7,15,0) 34%)}
+
+/* the loading ring */
+.ring{position:absolute;left:50%;bottom:46px;width:48px;height:48px;margin-left:-24px;
+  color:var(--accent);opacity:.85;transform:rotate(-90deg);pointer-events:none}
+.ring circle{transition:stroke-dashoffset .18s linear}
+.cue{position:absolute;left:50%;bottom:44px;margin-left:-13px;width:26px;color:var(--accent);
+  opacity:.8;animation:bob 2.6s var(--ease-soft) -.4s infinite;pointer-events:none}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
+
+/* ---- caption bands ---- */
+.band{position:absolute;left:0;right:0;top:0;height:100%;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding:19vh var(--pad) 0;text-align:center;opacity:0;pointer-events:none;
+  text-shadow:var(--tshadow)}
+.band .btn{text-shadow:none}
+/* layer 2, the per-band scrim */
+.band::before{content:"";position:absolute;inset:-4%;pointer-events:none;
+  opacity:calc(.25 + .75*var(--k,1));
+  background:radial-gradient(ellipse 74% 46% at 50% 34%,
+    rgba(5,5,10,.66) 0%,rgba(5,5,10,.44) 46%,rgba(5,5,10,0) 76%)}
+.band[data-peak="hook"]::before{
+  background:radial-gradient(ellipse 78% 48% at 50% 34%,
+    rgba(5,5,10,.72) 0%,rgba(5,5,10,.5) 46%,rgba(5,5,10,0) 76%)}
+.band.live{pointer-events:auto}
+
+.band h1,.band h2{font-size:clamp(2rem,5.6vw,4.4rem);max-width:19ch;position:relative;z-index:1}
+.band .sub{margin-top:22px;color:#C6D2E4;font-size:clamp(1rem,1.5vw,1.16rem);
+  max-width:52ch;position:relative;z-index:1}
+.band .row{margin-top:34px;display:flex;gap:14px;flex-wrap:wrap;justify-content:center;
+  position:relative;z-index:1}
+
+/* split text primitives */
+.vis-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.w{display:inline-block;white-space:pre}
+.c{display:inline-block;will-change:transform,opacity}
+
+/* (f) drift-down, band 1: words fall into place, echoing the descent */
+.b1 .w{--kc:clamp(0,(var(--k,0) - var(--th,0))*2.8,1);opacity:var(--kc);
+  transform:translateY(calc((1 - var(--kc)) * -26px))}
+
+/* (c) blur-to-sharp, band 2: echoes the cloud clearing off the lens */
+.b2 .soft{position:absolute;inset:0;filter:blur(11px);opacity:calc(1 - var(--k,0))}
+.b2 .sharp{opacity:var(--k,0)}
+.b2 .stack{position:relative;display:inline-block}
+
+/* (d) word-punch with overshoot, band 3: the idea lands like an impact */
+.b3 .w{--kc:clamp(0,(var(--k,0) - var(--th,0))*3,1);
+  --ks:clamp(0,(var(--k,0) - var(--th,0) - var(--sd,.1))*var(--ss,3.2),1);
+  opacity:var(--kc);
+  transform:scale(calc(0.62 + (0.38 + var(--ov,.12))*var(--kc) - var(--ov,.12)*var(--ks)))}
+.b3 .w.em{--ov:.24;--sd:.16;--ss:2.6;color:var(--accent)}
+
+/* (e) word-by-word rise into a staged settle, band 4 */
+.b4 .w{--kc:clamp(0,(var(--k,0) - var(--th,0))*2.6,1);opacity:var(--kc);
+  transform:translateY(calc((1 - var(--kc)) * 30px))}
+.b4 .sub{--ks:clamp(0,(var(--k,0) - .66)*4,1);opacity:var(--ks);
+  transform:translateY(calc((1 - var(--ks)) * 18px))}
+.b4 .row{--kb:clamp(0,(var(--k,0) - .78)*5,1);opacity:var(--kb);
+  transform:translateY(calc((1 - var(--kb)) * 16px))}
+
+/* ---- the static hero (phones, reduced motion) ---- */
+.static-hero{position:absolute;inset:0;display:none;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;padding:0 var(--pad);
+  background:#05070F center/cover no-repeat;text-shadow:var(--tshadow)}
+.static-hero::after{content:"";position:absolute;inset:0;
+  background:radial-gradient(ellipse 100% 70% at 50% 45%,rgba(5,7,15,.42) 0%,rgba(5,7,15,.82) 100%)}
+.static-hero > *{position:relative;z-index:1}
+.static-hero h1{font-size:clamp(2.1rem,8vw,3.4rem);max-width:15ch}
+.static-hero .sub{margin-top:20px;color:#C6D2E4;max-width:44ch;font-size:1rem}
+.static-hero .row{margin-top:30px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.static-hero .btn{text-shadow:none}
+
+/* ============================================================ sections */
+.sec{position:relative;z-index:1;padding:clamp(78px,11vw,150px) 0}
+.sec h2{font-size:clamp(1.85rem,4.1vw,3.1rem);max-width:17ch;margin-bottom:22px}
+
+/* entrance choreography */
+.rise{opacity:0;transform:translateY(26px);
+  transition:opacity .85s var(--ease),transform .85s var(--ease)}
+.in .rise{opacity:1;transform:none}
+.in .rise:nth-child(2){transition-delay:.09s}
+.in .rise:nth-child(3){transition-delay:.18s}
+.in .rise:nth-child(4){transition-delay:.27s}
+.in .rise:nth-child(5){transition-delay:.36s}
+.in.done .rise,.in.done .rise:nth-child(2),.in.done .rise:nth-child(3),
+.in.done .rise:nth-child(4),.in.done .rise:nth-child(5){transition-delay:0s}
+
+/* ---- 6.1 the first minute ---- */
+.minute{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(34px,5vw,76px);align-items:center}
+@media (max-width:880px){.minute{grid-template-columns:1fr}}
+.rule{position:absolute;left:calc(var(--pad) - 14px);top:0;bottom:0;width:1px;
+  background:linear-gradient(180deg,transparent,var(--accent-muted) 12%,var(--accent-muted) 84%,transparent);
+  transform:scaleY(var(--draw,0));transform-origin:top;
+  transition:transform 1.3s var(--ease)}
+@media (max-width:1400px){.rule{display:none}}
+.staccato{font-family:var(--display);font-weight:700;font-size:clamp(1.15rem,2.1vw,1.5rem);
+  margin-top:26px;letter-spacing:-.015em}
+.staccato span{color:var(--accent)}
+
+/* the interactive moment */
+.hold-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;
+  padding:clamp(24px,3.4vw,38px);position:relative;overflow:hidden}
+.hold-card::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:18px;
+  box-shadow:inset 0 0 60px rgba(43,224,196,.09);opacity:var(--hp,0);transition:opacity .4s var(--ease)}
+.hold-stage{position:relative;aspect-ratio:16/11;border-radius:12px;overflow:hidden;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 108%,rgba(255,155,74,.16),transparent 70%),
+    linear-gradient(180deg,#0A1120,#060A14)}
+.road{position:absolute;left:0;right:0;top:58%;height:1px;background:var(--line-strong);
+  transform:rotate(-7deg)}
+.road::before{content:"";position:absolute;inset:0;top:26px;height:1px;background:var(--line);opacity:.7}
+.locator{position:absolute;left:50%;top:52%;translate:-50% -50%}
+.locator circle{transform-box:fill-box;transform-origin:center}
+.lo-out{r:calc(38px - 25px * var(--hp,0));opacity:calc(.3 + .5*var(--hp,0));
+  transition:r .12s linear,opacity .12s linear}
+.lo-mid{r:calc(22px - 13px * var(--hp,0));opacity:calc(.45 + .45*var(--hp,0));
+  transition:r .12s linear,opacity .12s linear}
+.readout{position:absolute;left:14px;bottom:13px;font-family:var(--mono);font-size:.7rem;
+  color:var(--accent);background:rgba(8,8,15,.55);border:1px solid rgba(96,96,126,.3);
+  border-radius:10px;padding:5px 10px;backdrop-filter:blur(10px);
+  text-shadow:0 1px 3px rgba(5,5,10,.85)}
+.clock{position:absolute;right:14px;bottom:13px;font-family:var(--mono);font-size:.7rem;
+  color:var(--text-secondary);background:rgba(8,8,15,.55);border:1px solid rgba(96,96,126,.3);
+  border-radius:10px;padding:5px 10px;backdrop-filter:blur(10px)}
+.hold-btn{margin-top:18px;width:100%;font-family:var(--body);font-weight:600;font-size:.95rem;
+  padding:14px;border-radius:999px;border:1px solid var(--line-strong);
+  background:var(--panel-2);color:var(--text-primary);cursor:pointer;
+  transition:border-color .3s var(--ease),color .3s var(--ease),background .3s var(--ease);
+  touch-action:none;user-select:none;-webkit-user-select:none}
+.hold-btn:hover{border-color:var(--accent);color:var(--accent)}
+.hold-card.done .hold-btn{border-color:var(--accent);color:var(--accent);background:rgba(43,224,196,.08)}
+.hold-note{font-family:var(--mono);font-size:.72rem;color:var(--text-secondary);
+  margin-top:12px;text-align:center;min-height:1.3em}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:22px}
+.fact{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;
+  padding:14px 12px;text-align:center;opacity:.25;
+  transition:opacity .6s var(--ease),border-color .6s var(--ease),transform .6s var(--ease)}
+.hold-card.done .fact{opacity:1;border-color:var(--accent-muted)}
+.hold-card.done .fact:nth-child(2){transition-delay:.14s}
+.hold-card.done .fact:nth-child(3){transition-delay:.28s}
+.fact b{display:block;font-family:var(--display);font-weight:700;font-size:1.6rem;color:var(--accent);
+  line-height:1;margin-bottom:6px}
+.fact span{font-size:.76rem;color:var(--text-secondary);line-height:1.4;display:block}
+
+/* ---- 6.2 services ---- */
+.svc{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:16px;margin-top:44px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px 22px;
+  transition:border-color .45s var(--ease),transform .45s var(--ease)}
+.card:hover{border-color:var(--line-strong);transform:translateY(-3px)}
+.card .ico{width:26px;height:26px;color:var(--accent);margin-bottom:18px}
+.card h3{font-size:1.06rem;margin-bottom:9px;letter-spacing:-.01em}
+.card p{color:var(--text-secondary);font-size:.93rem;line-height:1.58}
+
+/* ---- 6.3 fuel: offset split, deliberately not the same skeleton as 6.2 ---- */
+.fuel{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,4.6vw,70px);align-items:center}
+@media (max-width:880px){.fuel{grid-template-columns:1fr}}
+.shot{position:relative;border-radius:18px;overflow:hidden;aspect-ratio:4/3;
+  background:linear-gradient(155deg,#0C1424,#070B15);border:1px solid var(--line)}
+.shot img{width:100%;height:100%;object-fit:cover}
+.shot::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,transparent 55%,rgba(5,7,15,.55))}
+.fuel p + p{margin-top:16px}
+.big-num{font-family:var(--display);font-weight:700;font-size:clamp(2.6rem,6vw,4.2rem);
+  color:var(--accent);line-height:.95;letter-spacing:-.03em}
+.big-num small{display:block;font-family:var(--body);font-weight:400;font-size:.86rem;
+  color:var(--text-secondary);letter-spacing:0;margin-top:10px;max-width:24ch}
+
+/* ---- 6.4 coverage ---- */
+.mapwrap{margin-top:40px;background:var(--panel);border:1px solid var(--line);
+  border-radius:18px;padding:clamp(18px,3vw,34px)}
+.corridor{width:100%;height:auto;max-height:66vh}
+.rt{fill:none;stroke:var(--accent);stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round;
+  opacity:.62;stroke-dasharray:var(--len,900);stroke-dashoffset:var(--len,900);
+  transition:stroke-dashoffset 1.9s var(--ease-soft)}
+.in .rt{stroke-dashoffset:0}
+.in .rt1{transition-delay:.3s}.in .rt2{transition-delay:.5s}.in .rt3{transition-delay:.7s}
+.pin circle{fill:var(--text-secondary)}
+.pin text{fill:var(--text-secondary);font-family:var(--mono);font-size:12px}
+.pin-hq circle{fill:var(--accent)}
+.pin-hq text{fill:var(--accent);font-family:var(--mono);font-size:13px}
+.pin-halo{fill:none;stroke:var(--accent);stroke-width:1.4;opacity:.5;
+  transform-box:fill-box;transform-origin:center;animation:halo 3.4s var(--ease-soft) -1.2s infinite}
+@keyframes halo{0%{transform:scale(1);opacity:.55}70%{transform:scale(2.9);opacity:0}100%{opacity:0}}
+
+/* ---- 6.5 why us: stat row, another different skeleton ---- */
+.why{display:grid;grid-template-columns:.95fr 1.05fr;gap:clamp(30px,4.6vw,70px);align-items:center}
+@media (max-width:880px){.why{grid-template-columns:1fr}}
+.proof{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;margin-top:36px;
+  background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.proof div{background:var(--panel);padding:22px 20px}
+.proof b{display:block;font-family:var(--display);font-weight:700;font-size:1.9rem;
+  color:var(--accent);line-height:1;margin-bottom:8px}
+.proof span{font-size:.87rem;color:var(--text-secondary);line-height:1.5}
+
+/* ---- 6.6 pricing ---- */
+.tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin-top:44px}
+.tier{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px 24px;
+  display:flex;flex-direction:column}
+.tier h3{font-size:1.14rem;margin-bottom:12px}
+.tier p{color:var(--text-secondary);font-size:.93rem;flex:1}
+.quote{display:inline-block;margin-top:22px;font-family:var(--mono);font-size:.76rem;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--accent);
+  border:1px solid var(--accent-muted);border-radius:999px;padding:8px 15px;align-self:flex-start}
+
+/* ---- 6.7 faq ---- */
+.faq{margin-top:40px;border-top:1px solid var(--line)}
+.faq details{border-bottom:1px solid var(--line)}
+.faq summary{cursor:pointer;padding:22px 44px 22px 0;position:relative;list-style:none;
+  font-family:var(--display);font-weight:600;font-size:1.04rem;letter-spacing:-.01em;
+  transition:color .3s var(--ease)}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary:hover{color:var(--accent)}
+.faq summary::after{content:"";position:absolute;right:8px;top:50%;width:11px;height:11px;
+  margin-top:-6px;border-right:1.6px solid var(--accent);border-bottom:1.6px solid var(--accent);
+  transform:rotate(45deg);transition:transform .35s var(--ease)}
+.faq details[open] summary::after{transform:rotate(-135deg)}
+.faq .ans{padding:0 0 24px;color:var(--text-secondary);max-width:74ch}
+
+/* ---- 6.8 contact ---- */
+.close{background:var(--panel);border:1px solid var(--line);border-radius:22px;
+  padding:clamp(30px,4.6vw,64px);display:grid;grid-template-columns:1fr 1fr;
+  gap:clamp(30px,4.6vw,60px);position:relative;overflow:hidden}
+@media (max-width:880px){.close{grid-template-columns:1fr}}
+.close::before{content:"";position:absolute;right:-90px;top:-90px;width:300px;height:300px;
+  border-radius:50%;background:radial-gradient(circle,rgba(43,224,196,.1),transparent 68%);
+  pointer-events:none}
+.tels{margin-top:24px;font-family:var(--mono);font-size:.88rem;line-height:2}
+.tels a{color:var(--text-secondary);text-decoration:none;transition:color .3s var(--ease)}
+.tels a:hover{color:var(--accent)}
+form{display:flex;flex-direction:column;gap:13px}
+label{font-family:var(--mono);font-size:.7rem;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--text-secondary);margin-bottom:6px;display:block}
+input,textarea{width:100%;background:var(--canvas);border:1px solid var(--line-strong);
+  border-radius:10px;padding:12px 14px;color:var(--text-primary);
+  font-family:var(--body);font-size:.96rem;transition:border-color .3s var(--ease)}
+input:focus,textarea:focus{border-color:var(--accent);outline:none}
+textarea{resize:vertical;min-height:96px}
+form .btn-go{border:none;cursor:pointer;font-size:.98rem;padding:14px 22px;margin-top:4px}
+.form-note{font-size:.8rem;color:var(--text-secondary);text-align:center;margin-top:2px}
+
+/* ---- footer ---- */
+.ftr{position:relative;z-index:1;border-top:1px solid var(--line);
+  padding:56px 0 40px;color:var(--text-secondary);font-size:.9rem}
+.ftr-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:34px}
+@media (max-width:760px){.ftr-grid{grid-template-columns:1fr}}
+.ftr h4{font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--text-primary);margin:0 0 14px;font-weight:500}
+.ftr a{color:var(--text-secondary);text-decoration:none;transition:color .3s var(--ease)}
+.ftr a:hover{color:var(--accent)}
+.ftr ul{list-style:none;margin:0;padding:0;line-height:2}
+.ftr-base{margin-top:40px;padding-top:24px;border-top:1px solid var(--line);
+  display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:.84rem}
+
+/* ============================================================ the five static-hero gates */
+@media (max-width:720px){
+  .band,.ring,.cue,#hero,.poster,.scrim,.scrim-top{display:none}
+  .static-hero{display:flex}
+  .hero{height:100vh}
+}
+@media (orientation:portrait) and (max-width:1024px){
+  .band,.ring,.cue,#hero,.poster,.scrim,.scrim-top{display:none}
+  .static-hero{display:flex}
+  .hero{height:100vh}
+}
+@media (orientation:portrait) and (pointer:coarse){
+  .band,.ring,.cue,#hero,.poster,.scrim,.scrim-top{display:none}
+  .static-hero{display:flex}
+  .hero{height:100vh}
+}
+@media (orientation:landscape) and (pointer:coarse) and (max-height:560px){
+  .band,.ring,.cue,#hero,.poster,.scrim,.scrim-top{display:none}
+  .static-hero{display:flex}
+  .hero{height:100vh}
+}
+@media (prefers-reduced-motion:reduce){
+  .band,.ring,.cue,#hero,.poster,.scrim,.scrim-top{display:none}
+  .static-hero{display:flex}
+  .hero{height:100vh}
+}
+/* scrub-capable but short: keep the scrub, drop the overlays with no room */
+@media (max-height:560px) and (pointer:fine){.cue,.ring{display:none}}
+
+/* pause everything off-tab */
+body.paused *,body.paused *::before,body.paused *::after{animation-play-state:paused !important}
+
+/* ============================================================ reduced motion */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;transition-delay:0s !important}
+  .rise{opacity:1;transform:none}
+  .rt{stroke-dashoffset:0}
+  .fact{opacity:1;border-color:var(--accent-muted)}
+  .rule{transform:scaleY(1)}
+  .env::before{animation:none}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="env" aria-hidden="true"></div>
+
+<nav class="nav" id="nav">
+  <div class="nav-in">
+    <a class="brand" href="#main">
+      <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="10" fill="none" stroke="#2BE0C4" stroke-width="1.5" opacity=".45"/>
+        <circle cx="16" cy="16" r="6" fill="none" stroke="#2BE0C4" stroke-width="1.5" opacity=".7"/>
+        <circle cx="16" cy="16" r="2.6" fill="#2BE0C4"/>
+      </svg>
+      Sky Worth
+    </a>
+    <div class="nav-links">
+      <a href="#watch">What we watch</a>
+      <a href="#coverage">Coverage</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">Questions</a>
+    </div>
+    <a class="btn btn-go" href="https://wa.me/256703664233?text=Hi%20Sky%20Worth%2C%20I%20would%20like%20a%20tracking%20quote%20for%20my%20vehicle." rel="noopener">WhatsApp us</a>
+  </div>
+</nav>
+
+<main id="main" tabindex="-1">
+
+<!-- ============================================ hero -->
+<section class="hero" id="hero-sec">
+  <div class="stage" id="stage">
+    <div class="poster" id="poster" aria-hidden="true"></div>
+    <video id="hero" preload="none" muted playsinline aria-hidden="true" tabindex="-1"></video>
+    <div class="scrim" aria-hidden="true"></div>
+    <div class="scrim-top" aria-hidden="true"></div>
+
+    <svg class="ring" id="ring" viewBox="0 0 48 48" aria-hidden="true">
+      <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="3"
+              stroke-dasharray="126" style="stroke-dashoffset:var(--ld,126)"/>
+    </svg>
+
+    <!-- band 1: drift-down -->
+    <div class="band b1" data-a="0" data-b="0.22" data-spread=".42">
+      <h1 data-split="word">Somewhere down there is your car.</h1>
+    </div>
+
+    <!-- band 2: blur-to-sharp -->
+    <div class="band b2" data-a="0.26" data-b="0.48">
+      <h2><span class="stack"><span class="soft" aria-hidden="true">Most owners find out hours later.</span><span class="sharp">Most owners find out hours later.</span></span></h2>
+    </div>
+
+    <!-- band 3: word-punch with overshoot -->
+    <div class="band b3" data-peak="hook" data-a="0.52" data-b="0.72" data-spread=".5">
+      <h2 data-split="word" data-em="first minute">The ones that come back are found in the first minute.</h2>
+    </div>
+
+    <!-- band 4: word-by-word rise into a staged settle -->
+    <div class="band b4" data-a="0.78" data-b="1" data-ramp="0.05" data-spread=".4">
+      <h2 data-split="word">Know the moment it moves.</h2>
+      <p class="sub">GPS tracking, fleet and fuel monitoring across Uganda, Kenya, South Sudan and DR Congo. Kampala since 2014.</p>
+      <div class="row">
+        <a class="btn btn-go" href="https://wa.me/256703664233?text=Hi%20Sky%20Worth%2C%20I%20would%20like%20a%20tracking%20quote%20for%20my%20vehicle." rel="noopener">Message us on WhatsApp</a>
+        <a class="btn btn-ghost" href="#pricing">See what it costs</a>
+      </div>
+    </div>
+
+    <!-- the composed static hero -->
+    <div class="static-hero" id="static-hero">
+      <h1>Know the moment it moves.</h1>
+      <p class="sub">GPS vehicle tracking, fleet and fuel monitoring, and asset recovery. Kampala since 2014, across Uganda, Kenya, South Sudan and DR Congo.</p>
+      <div class="row">
+        <a class="btn btn-go" href="https://wa.me/256703664233?text=Hi%20Sky%20Worth%2C%20I%20would%20like%20a%20tracking%20quote%20for%20my%20vehicle." rel="noopener">Message us on WhatsApp</a>
+        <a class="btn btn-ghost" href="#pricing">See what it costs</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 6.1 the first minute -->
+<section class="sec" id="first-minute">
+  <div class="wrap minute">
+    <div class="rule" id="rule" aria-hidden="true"></div>
+    <div>
+      <p class="kicker rise">The first minute</p>
+      <h2 class="rise">A stolen car is still yours for about a minute.</h2>
+      <p class="lede rise">After that it is plates, paint and a border. The cars that come home are the ones whose owner knew straight away and could tell the police exactly where to go. That is the whole job.</p>
+      <p class="staccato rise">Not maps. Not reports. <span>Speed.</span></p>
+    </div>
+
+    <div class="hold-card rise" id="hold">
+      <div class="hold-stage">
+        <div class="road" aria-hidden="true"></div>
+        <svg class="locator" width="96" height="96" viewBox="-48 -48 96 96" aria-hidden="true">
+          <circle class="lo-out" cx="0" cy="0" r="38" fill="none" stroke="#2BE0C4" stroke-width="1.2"/>
+          <circle class="lo-mid" cx="0" cy="0" r="22" fill="none" stroke="#2BE0C4" stroke-width="1.4"/>
+          <circle cx="0" cy="0" r="3.4" fill="#2BE0C4"/>
+        </svg>
+        <span class="readout">0.2984 N, 32.6006 E</span>
+        <span class="clock" id="clock">00s</span>
+      </div>
+      <button class="hold-btn" id="holdbtn" type="button" aria-describedby="holdnote">Press and hold to close the gap</button>
+      <p class="hold-note" id="holdnote">Press and hold to close the gap.</p>
+      <div class="facts">
+        <div class="fact"><b>46</b><span>vehicles recovered by police in one month</span></div>
+        <div class="fact"><b>88%</b><span>of reported theft cases resolved</span></div>
+        <div class="fact"><b>3</b><span>of the 5 cars taken daily go from Kampala</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 6.2 what we watch -->
+<section class="sec" id="watch">
+  <div class="wrap">
+    <p class="kicker rise">What we watch</p>
+    <h2 class="rise">Five things, one screen.</h2>
+    <div class="svc">
+      <div class="card rise">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 13l2-5.2A2 2 0 0 1 6.9 6.5h10.2A2 2 0 0 1 19 7.8L21 13v5.5h-3V17H6v1.5H3z"/><circle cx="7" cy="15" r="1.2"/><circle cx="17" cy="15" r="1.2"/></svg>
+        <h3>Car tracking</h3>
+        <p>Your own vehicle, live, on your phone. Movement alerts the moment it rolls without you.</p>
+      </div>
+      <div class="card rise">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 8h9v8H3zM12 11h4.6l2.4 3v2h-7z"/><circle cx="6.5" cy="18" r="1.5"/><circle cx="16.5" cy="18" r="1.5"/></svg>
+        <h3>Fleet management</h3>
+        <p>Where every vehicle is, where it has been, how long it idled, who was driving.</p>
+      </div>
+      <div class="card rise">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 20V5.5A1.5 1.5 0 0 1 5.5 4h6A1.5 1.5 0 0 1 13 5.5V20M3 20h11"/><path d="M13 10h3.2a1.8 1.8 0 0 1 1.8 1.8V16a1.6 1.6 0 0 0 3.2 0V9l-2.4-2.4"/><path d="M6.5 8h4"/></svg>
+        <h3>Fuel monitoring</h3>
+        <p>A sensor in the tank, not a number on a receipt. You see the level drop while it is dropping.</p>
+      </div>
+      <div class="card rise">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 3l8 4.2v9.6L12 21l-8-4.2V7.2z"/><path d="M12 12l8-4.2M12 12v9M12 12L4 7.8"/></svg>
+        <h3>Asset tracking</h3>
+        <p>Generators, containers, plant and machinery. Anything worth stealing is worth watching.</p>
+      </div>
+      <div class="card rise">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="14" r="1.3"/></svg>
+        <h3>Vehicle finance</h3>
+        <p>For lenders and dealers. Know the car is where the borrower says it is, before it is a bad debt.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 6.3 fuel -->
+<section class="sec" id="fuel">
+  <div class="wrap fuel">
+    <div>
+      <p class="kicker rise">For fleet owners</p>
+      <h2 class="rise">Nobody breaks a window to steal diesel.</h2>
+      <p class="lede rise">Four hundred litres can leave a tanker in twelve minutes through a pipe and a row of jerrycans. On the Busia, Malaba and Mutukula routes around forty tankers a night get hit. Uganda loses somewhere between two hundred and three hundred billion shillings a year this way, and most of it never looks like a crime on paper. It looks like a driver's fuel claim.</p>
+      <p class="lede rise" style="margin-top:16px">A tank sensor changes the argument. You are not comparing receipts at the end of the month. You get a message while the level is falling.</p>
+      <p class="big-num rise" style="margin-top:34px">12 min<small>The time it takes for 400 litres to disappear from a parked tanker.</small></p>
+    </div>
+    <div class="shot rise">
+      <img src="assets/fuel-corridor.jpg" alt="A fuel tanker parked on a corridor road at night under sodium lighting." loading="lazy" width="1920" height="1440">
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 6.4 coverage -->
+<section class="sec" id="coverage">
+  <div class="wrap">
+    <p class="kicker rise">Coverage</p>
+    <h2 class="rise">The routes your trucks actually run.</h2>
+    <p class="lede rise">Kampala to Mombasa through Malaba and Nairobi. Kampala north to Juba. South and west to Kigali and Goma. We track across the border, not up to it.</p>
+    <div class="mapwrap rise">
+      <svg class="corridor" viewBox="0 0 608 530" role="img"
+        aria-label="Map of the Northern Corridor showing tracked freight routes from Mombasa through Nairobi and Malaba to Kampala, and onward from Kampala to Juba, Kigali and Goma.">
+        <path class="rt rt0" d="M567.3 494.0 L507.0 455.0 L449.8 397.8 L419.6 350.5 L356.2 304.2 L312.0 265.2 L287.6 250.6 L231.4 261.6 L199.2 266.8"><title>Mombasa to Kampala</title></path>
+        <path class="rt rt1" d="M199.2 266.8 L192.4 210.6 L184.6 139.4 L171.6 95.2 L147.2 31.2"><title>Kampala to Juba</title></path>
+        <path class="rt rt2" d="M199.2 266.8 L155.5 300.6 L99.3 314.6 L83.2 348.4 L68.1 384.3"><title>Kampala to Kigali</title></path>
+        <path class="rt rt3" d="M199.2 266.8 L155.5 300.6 L99.3 314.6 L57.2 343.2 L24.4 370.8"><title>Kampala to Goma</title></path>
+        <g class="pin"><circle cx="567.3" cy="494.0" r="4"/><text x="557.3" y="498" text-anchor="end">Mombasa</text></g>
+        <g class="pin"><circle cx="419.6" cy="350.5" r="4"/><text x="429.6" y="354.5" text-anchor="start">Nairobi</text></g>
+        <g class="pin"><circle cx="287.6" cy="250.6" r="4"/><text x="297.6" y="254.6" text-anchor="start">Malaba</text></g>
+        <g class="pin pin-hq"><circle cx="199.2" cy="266.8" r="6.5"/><circle class="pin-halo" cx="199.2" cy="266.8" r="6.5"/><text x="189.2" y="270.8" text-anchor="end">Kampala</text></g>
+        <g class="pin"><circle cx="184.6" cy="139.4" r="4"/><text x="174.6" y="143.4" text-anchor="end">Gulu</text></g>
+        <g class="pin"><circle cx="147.2" cy="31.2" r="4"/><text x="137.2" y="35.2" text-anchor="end">Juba</text></g>
+        <g class="pin"><circle cx="68.1" cy="384.3" r="4"/><text x="58.1" y="388.3" text-anchor="end">Kigali</text></g>
+        <g class="pin"><circle cx="24.4" cy="370.8" r="4"/><text x="34.4" y="374.8" text-anchor="start">Goma</text></g>
+        <g class="pin"><circle cx="99.3" cy="314.6" r="4"/><text x="89.3" y="318.6" text-anchor="end">Mbarara</text></g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 6.5 why us -->
+<section class="sec" id="why">
+  <div class="wrap why">
+    <div class="shot rise">
+      <img src="assets/fitting-bay.jpg" alt="A vehicle in a fitting bay at night, a technician working at the dashboard." loading="lazy" width="1920" height="1440">
+    </div>
+    <div>
+      <p class="kicker rise">Why us</p>
+      <h2 class="rise">The tracker is the easy part.</h2>
+      <p class="lede rise">Ask anyone who has lost a car with a tracker fitted. The device worked. The problem was that nobody picked up. Our shop is at Kabalagala Market, Shop 15B. We have been there since 2014. When you message that WhatsApp number, a person in Kampala reads it.</p>
+      <div class="proof rise">
+        <div><b>2014</b><span>Trading in Kampala since then, at the same market.</span></div>
+        <div><b>4</b><span>Countries covered: Uganda, Kenya, South Sudan, DR Congo.</span></div>
+        <div><b>1</b><span>WhatsApp number, answered by a person, not a queue.</span></div>
+        <div><b>15B</b><span>Kabalagala Market. A door you can walk through.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 6.6 pricing -->
+<section class="sec" id="pricing">
+  <div class="wrap">
+    <p class="kicker rise">Pricing</p>
+    <h2 class="rise">We quote per vehicle, and we say the number out loud.</h2>
+    <p class="lede rise">What you pay depends on the unit, whether you want fuel sensing, and how many vehicles. It is a short conversation, not a form with a hidden total. Send us what you have and we will send you the price.</p>
+    <div class="tiers">
+      <div class="tier rise">
+        <h3>One vehicle</h3>
+        <p>A tracker fitted, the app on your phone, movement and ignition alerts. For an owner with a car to protect.</p>
+        <span class="quote">Request a quote</span>
+      </div>
+      <div class="tier rise">
+        <h3>Fleet</h3>
+        <p>Everything above across your vehicles, plus trip history, idling, driver behaviour and reports.</p>
+        <span class="quote">Request a quote</span>
+      </div>
+      <div class="tier rise">
+        <h3>Fleet with fuel</h3>
+        <p>The fleet package plus tank sensors, so a drop in level reaches you while it is happening.</p>
+        <span class="quote">Request a quote</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 6.7 faq -->
+<section class="sec" id="faq">
+  <div class="wrap">
+    <p class="kicker rise">Straight answers</p>
+    <h2 class="rise">The five we get every week.</h2>
+    <div class="faq rise">
+      <details>
+        <summary>What happens when it leaves network coverage?</summary>
+        <div class="ans">The unit keeps recording while it is out of range and sends the whole trip the moment it finds signal again. You lose the live view for that stretch. You do not lose the history.</div>
+      </details>
+      <details>
+        <summary>Can a thief just disable it?</summary>
+        <div class="ans">They can find a unit if they have time and know where to look, which is exactly why the first minute matters so much. Fitting position is deliberately not standard, and movement alerts reach you before anyone has that time.</div>
+      </details>
+      <details>
+        <summary>Is a monthly fee worth it when some sellers advertise none?</summary>
+        <div class="ans">A tracker with no fee has no SIM and no server behind it, so it can log a trip but it cannot tell you anything while it is happening. You are buying the alert, not the box.</div>
+      </details>
+      <details>
+        <summary>Who can see where my car is?</summary>
+        <div class="ans">You can. We hold the data to run the service and we do not sell it or hand it to anyone without you or a police case.</div>
+      </details>
+      <details>
+        <summary>How long does fitting take?</summary>
+        <div class="ans">Most single vehicles are done inside an hour at the shop. For fleets we come to your yard and work through them.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 6.8 the close -->
+<section class="sec" id="contact">
+  <div class="wrap">
+    <div class="close rise">
+      <div>
+        <p class="kicker">Talk to us</p>
+        <h2>Tell us what you drive.</h2>
+        <p class="lede">Send the vehicle and the town. We will tell you what fits it and what it costs. No callback queue and no sales script.</p>
+        <p style="margin-top:28px">
+          <a class="btn btn-go" href="https://wa.me/256703664233?text=Hi%20Sky%20Worth%2C%20I%20would%20like%20a%20tracking%20quote%20for%20my%20vehicle." rel="noopener">Message us on WhatsApp</a>
+        </p>
+        <div class="tels">
+          <a href="tel:+256703664233">0703 664 233</a><br>
+          <a href="tel:+256782390246">0782 390 246</a><br>
+          <a href="tel:+256414671986">0414 671 986</a>
+        </div>
+      </div>
+      <form id="lead" action="mailto:info@sky-worths.com" method="post" enctype="text/plain">
+        <div><label for="f-name">Your name</label><input id="f-name" name="name" type="text" required></div>
+        <div><label for="f-veh">What you drive</label><input id="f-veh" name="vehicle" type="text" placeholder="Toyota Hiace, or 8 trucks" required></div>
+        <div><label for="f-town">Your town</label><input id="f-town" name="town" type="text" placeholder="Kampala"></div>
+        <div><label for="f-msg">Anything else</label><textarea id="f-msg" name="message"></textarea></div>
+        <button class="btn btn-go" type="submit">Send it</button>
+        <p class="form-note">This opens your email app. WhatsApp is faster.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr-grid">
+      <div>
+        <a class="brand" href="#main" style="margin-bottom:14px">
+          <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+            <circle cx="16" cy="16" r="10" fill="none" stroke="#2BE0C4" stroke-width="1.5" opacity=".45"/>
+            <circle cx="16" cy="16" r="6" fill="none" stroke="#2BE0C4" stroke-width="1.5" opacity=".7"/>
+            <circle cx="16" cy="16" r="2.6" fill="#2BE0C4"/>
+          </svg>
+          Sky Worth
+        </a>
+        <p>GPS vehicle tracking, fleet and fuel monitoring, and asset recovery. Trading in Kampala since 2014.</p>
+      </div>
+      <div>
+        <h4>Where we are</h4>
+        <p>Sky Worth Ltd<br>Kabalagala Market, Shop 15B<br>Kampala, Uganda</p>
+      </div>
+      <div>
+        <h4>Reach us</h4>
+        <ul>
+          <li><a href="https://wa.me/256703664233" rel="noopener">WhatsApp 0703 664 233</a></li>
+          <li><a href="tel:+256782390246">0782 390 246</a></li>
+          <li><a href="tel:+256414671986">0414 671 986</a></li>
+          <li><a href="mailto:info@sky-worths.com">info@sky-worths.com</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="ftr-base">
+      <span>&copy; <span id="yr">2026</span> Sky Worth Ltd. All rights reserved.</span>
+      <span>Uganda, Kenya, South Sudan, DR Congo.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+'use strict';
+
+/* ============================================================ helpers */
+var clamp=function(v,lo,hi){return Math.min(hi,Math.max(lo,v));};
+var smoothstep=function(p,e0,e1){var t=clamp((p-e0)/(e1-e0),0,1);return t*t*(3-2*t);};
+function rng(seed){var s=seed>>>0;return function(){s=(s*1664525+1013904223)>>>0;return s/4294967296;};}
+
+document.getElementById('yr').textContent=new Date().getFullYear();
+
+/* ============================================================ split text */
+var bands=[].slice.call(document.querySelectorAll('.band'));
+
+function splitAll(){
+  document.querySelectorAll('[data-split="word"]').forEach(function(el,ei){
+    var text=el.textContent.trim();
+    var em=(el.getAttribute('data-em')||'').toLowerCase();
+    var band=el.closest('.band');
+    var spread=parseFloat(band&&band.getAttribute('data-spread'))||0.4;
+    var r=rng(9871+ei*7919);
+
+    var sr=document.createElement('span');
+    sr.className='vis-hidden';sr.textContent=text;
+
+    var vis=document.createElement('span');
+    vis.setAttribute('aria-hidden','true');
+
+    var words=text.split(' ');
+    words.forEach(function(w,i){
+      var span=document.createElement('span');
+      span.className='w';
+      span.textContent=w+(i<words.length-1?' ':'');
+      // ordered threshold with a little jitter, so the stagger reads as intentional
+      span.style.setProperty('--th',(i/words.length*spread+r()*0.05).toFixed(3));
+      if(em&&em.indexOf(w.toLowerCase().replace(/[^a-z]/g,''))>-1&&w.length>2){
+        span.classList.add('em');
+      }
+      vis.appendChild(span);
+    });
+    el.textContent='';
+    el.appendChild(sr);
+    el.appendChild(vis);
+  });
+}
+splitAll();
+
+/* ============================================================ hero scrub */
+var stage=document.getElementById('stage');
+var heroSec=document.getElementById('hero-sec');
+var video=document.getElementById('hero');
+var ring=document.getElementById('ring');
+var posterLayer=document.getElementById('poster');
+
+var VIDEO_URL='assets/hero-scrub.mp4';
+var POSTER_URL='assets/hero-poster.jpg';
+var VIDEO_BYTES=6000000;
+
+var heroOnScreen=true, rafId=null, lastTick=0, target=0, shown=0;
+var seekBusy=false, pendingTime=null;
+var scrubOn=false, inited=false, videoDead=false;
+var loadK=0, loadStart=0;
+
+function heroProgress(){
+  var r=heroSec.getBoundingClientRect();
+  var range=heroSec.offsetHeight-window.innerHeight;
+  if(range<=0) return 0;
+  return clamp(-r.top/range,0,1);
+}
+
+/* ---- gated seeks ---- */
+function requestSeek(t){
+  if(!video.duration||videoDead) return;
+  if(seekBusy){pendingTime=t;return;}
+  seekBusy=true;
+  try{video.currentTime=t;}catch(e){seekBusy=false;}
+}
+video.addEventListener('seeked',function(){
+  seekBusy=false;
+  if(pendingTime!==null){var t=pendingTime;pendingTime=null;requestSeek(t);}
+});
+video.addEventListener('error',function(){
+  seekBusy=false;pendingTime=null;failVideo();
+});
+
+/* ---- caption bands ---- */
+bands.forEach(function(b){
+  b.a=parseFloat(b.getAttribute('data-a'));
+  b.b=parseFloat(b.getAttribute('data-b'));
+  b.ramp=parseFloat(b.getAttribute('data-ramp'))||0;
+  b.op=-1;b.kv=-1;
+});
+
+function updateCaptions(p){
+  for(var i=0;i<bands.length;i++){
+    var bd=bands[i], a=bd.a, b=bd.b;
+    var f=Math.min(0.02,(b-a)/3);
+    var inRamp=(i===0)?1:smoothstep(p,a,a+f);
+    var outRamp=(i===bands.length-1)?1:(1-smoothstep(p,b-f,b));
+    var op=inRamp*outRamp;
+
+    var k=clamp((p-a)/(bd.ramp||Math.min(0.025,(b-a)*0.35)),0,1);
+    if(i===0) k=Math.max(k,loadK);
+
+    if(Math.abs(op-bd.op)>0.004){
+      bd.op=op;
+      bd.style.opacity=op.toFixed(3);
+      var live=op>0.5;
+      if(live!==bd.isLive){bd.isLive=live;bd.classList.toggle('live',live);}
+    }
+    if(Math.abs(k-bd.kv)>0.008){
+      bd.kv=k;
+      bd.style.setProperty('--k',k.toFixed(3));
+    }
+  }
+}
+
+/* ---- the rAF loop that rests ---- */
+function tick(now){
+  var dt=Math.min(100,now-(lastTick||now));
+  lastTick=now;
+  var k=0.16;
+  shown+=(target-shown)*(1-Math.pow(1-k,dt/16.667));
+
+  var ramping=false;
+  if(loadStart&&loadK<1){
+    loadK=clamp((now-loadStart)/900,0,1);
+    ramping=loadK<1;
+  }
+
+  if(Math.abs(target-shown)<0.0005&&!ramping){
+    shown=target;rafId=null;lastTick=0;
+  }else{
+    rafId=requestAnimationFrame(tick);
+  }
+  if(video.duration) requestSeek(shown*video.duration);
+  updateCaptions(shown);
+}
+
+function onScroll(){
+  target=heroProgress();
+  if(rafId===null&&heroOnScreen&&scrubOn) rafId=requestAnimationFrame(tick);
+}
+
+if('IntersectionObserver' in window){
+  new IntersectionObserver(function(es){
+    heroOnScreen=es[0].isIntersecting;
+    if(heroOnScreen&&scrubOn&&rafId===null) rafId=requestAnimationFrame(tick);
+  },{rootMargin:'10px'}).observe(heroSec);
+}
+
+/* ---- the blob loader ---- */
+function failVideo(){
+  if(videoDead) return;
+  videoDead=true;
+  stage.classList.add('video-failed');
+  if(ring&&ring.parentNode){
+    var cue=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    cue.setAttribute('class','cue');
+    cue.setAttribute('viewBox','0 0 26 26');
+    cue.setAttribute('aria-hidden','true');
+    cue.innerHTML='<path d="M6 10l7 7 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+    ring.parentNode.replaceChild(cue,ring);
+    ring=null;
+  }
+}
+
+var started=false;
+function startBlobFetch(){
+  if(started) return;
+  started=true;
+  loadHeroBlob().catch(failVideo);
+}
+
+async function loadHeroBlob(){
+  var ctrl=new AbortController();
+  var watchdog=setTimeout(function(){ctrl.abort();},20000);
+  var res=await fetch(VIDEO_URL,{signal:ctrl.signal});
+  if(!res.ok||!res.body) throw new Error('no video');
+  var total=Number(res.headers.get('Content-Length'))||VIDEO_BYTES;
+  var reader=res.body.getReader();
+  var chunks=[],got=0,lastRing=0;
+  for(;;){
+    var r=await reader.read();
+    if(r.done) break;
+    clearTimeout(watchdog);
+    watchdog=setTimeout(function(){ctrl.abort();},20000);
+    chunks.push(r.value);
+    got+=r.value.length;
+    var frac=Math.min(1,got/total);
+    var now=performance.now();
+    if((now-lastRing>100||frac===1)&&ring){
+      lastRing=now;
+      ring.style.setProperty('--ld',Math.round(126*(1-frac)));
+    }
+  }
+  clearTimeout(watchdog);
+  if(ring) ring.style.setProperty('--ld',0);
+  video.src=URL.createObjectURL(new Blob(chunks));
+  video.load();
+  video.addEventListener('canplay',function(){
+    if(ring&&ring.parentNode){ring.parentNode.removeChild(ring);ring=null;}
+    requestSeek(heroProgress()*(video.duration||0));
+    stage.classList.add('video-ready');
+  },{once:true});
+}
+
+function initHeroOnce(){
+  if(inited) return;
+  inited=true;
+  // the poster wins the bandwidth race: paint it, then start the blob
+  posterLayer.style.backgroundImage="url('"+POSTER_URL+"')";
+  var pi=new Image();
+  pi.onload=function(){posterLayer.classList.add('on');startBlobFetch();};
+  pi.onerror=startBlobFetch;
+  pi.src=POSTER_URL;
+  setTimeout(startBlobFetch,4000);
+  loadStart=performance.now();
+}
+
+/* ============================================================ the five gates, live */
+var GATES=[
+  '(max-width: 720px)',
+  '(orientation: portrait) and (max-width: 1024px)',
+  '(orientation: portrait) and (pointer: coarse)',
+  '(orientation: landscape) and (pointer: coarse) and (max-height: 560px)',
+  '(prefers-reduced-motion: reduce)'
+];
+var MQLS=GATES.map(function(q){return matchMedia(q);});
+
+function enableScrub(){
+  if(scrubOn) return;
+  scrubOn=true;
+  initHeroOnce();
+  addEventListener('scroll',onScroll,{passive:true});
+  bands.forEach(function(b){b.op=-1;b.kv=-1;});
+  unpinFinalStates();
+  updateCaptions(heroProgress());
+  onScroll();
+}
+function disableScrub(){
+  if(!scrubOn) return;
+  scrubOn=false;
+  removeEventListener('scroll',onScroll);
+  if(rafId!==null){cancelAnimationFrame(rafId);rafId=null;}
+}
+function applyHeroMode(){
+  if(MQLS.some(function(m){return m.matches;})) disableScrub();
+  else enableScrub();
+}
+MQLS.forEach(function(m){m.addEventListener('change',applyHeroMode);});
+
+/* ============================================================ section entrances */
+var secObs=null;
+if('IntersectionObserver' in window){
+  secObs=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var el=e.target;
+      el.classList.add('in');
+      setTimeout(function(){el.classList.add('done');},1400);
+      secObs.unobserve(el);
+    });
+  },{threshold:0.14});
+  document.querySelectorAll('.sec .wrap, .mapwrap').forEach(function(el){secObs.observe(el);});
+}
+
+/* the descent rule draws downward */
+var rule=document.getElementById('rule');
+if(rule&&'IntersectionObserver' in window){
+  new IntersectionObserver(function(es){
+    if(es[0].isIntersecting) rule.style.setProperty('--draw',1);
+  },{threshold:0.2}).observe(rule.parentNode);
+}
+
+/* route lengths, so each line draws over its own length */
+document.querySelectorAll('.rt').forEach(function(p){
+  try{p.style.setProperty('--len',Math.ceil(p.getTotalLength()));}catch(e){}
+});
+
+/* ============================================================ the one interactive moment */
+var holdCard=document.getElementById('hold');
+var holdBtn=document.getElementById('holdbtn');
+var clockEl=document.getElementById('clock');
+var noteEl=document.getElementById('holdnote');
+var hp=0, holding=false, holdRaf=null, holdLast=0, holdDone=false;
+var lastClock='';
+
+function setHold(v){
+  hp=clamp(v,0,1);
+  holdCard.style.setProperty('--hp',hp.toFixed(3));
+  var secs=Math.round(hp*60);
+  var s=(secs<10?'0':'')+secs+'s';
+  if(s!==lastClock){lastClock=s;clockEl.textContent=s;}
+}
+function holdTick(now){
+  var dt=Math.min(100,now-(holdLast||now));
+  holdLast=now;
+  if(holding) setHold(hp+dt/2200);
+  else setHold(hp-dt/1400);
+
+  if(holding&&hp>=1&&!holdDone){
+    holdDone=true;
+    holdCard.classList.add('done');
+    noteEl.textContent='Found. That is the whole idea.';
+    holdBtn.textContent='Found. That is the whole idea.';
+  }
+  if((holding&&hp<1)||(!holding&&hp>0)) holdRaf=requestAnimationFrame(holdTick);
+  else {holdRaf=null;holdLast=0;}
+}
+function startHold(e){
+  if(holdDone) return;
+  if(e&&e.cancelable) e.preventDefault();
+  holding=true;
+  if(holdRaf===null) holdRaf=requestAnimationFrame(holdTick);
+}
+function endHold(){
+  holding=false;
+  if(holdRaf===null&&hp>0) holdRaf=requestAnimationFrame(holdTick);
+}
+if(holdBtn){
+  holdBtn.addEventListener('pointerdown',startHold);
+  addEventListener('pointerup',endHold);
+  addEventListener('pointercancel',endHold);
+  holdBtn.addEventListener('keydown',function(e){
+    if(e.key===' '||e.key==='Enter'){e.preventDefault();startHold();}
+  });
+  holdBtn.addEventListener('keyup',function(e){
+    if(e.key===' '||e.key==='Enter') endHold();
+  });
+}
+
+/* ============================================================ reduced motion, both directions */
+function pinToFinalStates(){
+  document.querySelectorAll('.sec .wrap, .mapwrap').forEach(function(el){el.classList.add('in','done');});
+  if(rule) rule.style.setProperty('--draw',1);
+  if(holdCard&&!holdDone){
+    holdDone=true;holding=false;
+    if(holdRaf!==null){cancelAnimationFrame(holdRaf);holdRaf=null;}
+    setHold(1);
+    holdCard.classList.add('done');
+    noteEl.textContent='Found. That is the whole idea.';
+    holdBtn.textContent='Found. That is the whole idea.';
+  }
+}
+function unpinFinalStates(){
+  if(rule&&!rmq.matches){
+    // the rule is re-armed by its own observer; clear the pin so scroll owns it again
+    var seen=rule.parentNode.getBoundingClientRect().top<window.innerHeight;
+    if(!seen) rule.style.setProperty('--draw',0);
+  }
+}
+var rmq=matchMedia('(prefers-reduced-motion: reduce)');
+rmq.addEventListener('change',function(e){
+  if(e.matches) pinToFinalStates();
+  else applyHeroMode();
+});
+if(rmq.matches) pinToFinalStates();
+
+/* ============================================================ odds and ends */
+var nav=document.getElementById('nav');
+var navTick=false;
+addEventListener('scroll',function(){
+  if(navTick) return;
+  navTick=true;
+  requestAnimationFrame(function(){
+    var s=scrollY>12;
+    if(s!==nav.stuckState){nav.stuckState=s;nav.classList.toggle('stuck',s);}
+    navTick=false;
+  });
+},{passive:true});
+
+document.addEventListener('visibilitychange',function(){
+  document.body.classList.toggle('paused',document.hidden);
+});
+
+applyHeroMode();
+})();
+</script>
+</body>
+</html>
